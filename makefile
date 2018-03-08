@@ -1,5 +1,5 @@
 CC = g++
-BOOST = /usr/local/Cellar/boost/1.65.0
+BOOST = /usr/local/Cellar/boost/1.66.0
 INCLUDE = `python3-config --includes` -std=c++14 -I$(BOOST)/include
 LDFLAGS = `python3-config --ldflags` -lboost_serialization -lboost_python3 -L$(BOOST)/lib
 SOFLAGS = -shared -fPIC -march=native
@@ -10,8 +10,8 @@ SOURCES = src/python/*.cpp src/npylm/*.cpp src/npylm/lm/*.cpp
 UNAME = $(shell uname)
 
 ifeq ($(UNAME),Darwin)
-INCLUDE = `/usr/bin/python-config --includes` -std=c++14 -I$(BOOST)/include
-LDFLAGS = -framework Python -lboost_serialization -lboost_python -L$(BOOST)/lib
+INCLUDE = `/usr/local/bin/python3-config --includes` -std=c++14 -I$(BOOST)/include
+LDFLAGS = `/usr/local/bin/python3-config --ldflags` -lboost_serialization -lboost_python3 -L$(BOOST)/lib
 SOFLAGS = -DPIC -bundle -fPIC -march=native
 endif
 
