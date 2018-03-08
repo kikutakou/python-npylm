@@ -6,6 +6,15 @@ SOFLAGS = -shared -fPIC -march=native
 TESTFLAGS = -O0 -g -Wall
 SOURCES = src/python/*.cpp src/npylm/*.cpp src/npylm/lm/*.cpp
 
+
+UNAME = $(shell uname)
+
+ifeq ($(UNAME),Darwin)
+INCLUDE = `/usr/bin/python-config --includes` -std=c++14 -I$(BOOST)/include
+LDFLAGS = -framework Python -lboost_serialization -lboost_python -L$(BOOST)/lib
+SOFLAGS = -DPIC -bundle -fPIC -march=native
+endif
+
 install: ## npylm.soを生成
 	$(CC) $(INCLUDE) $(SOFLAGS) src/python.cpp $(SOURCES) $(LDFLAGS) -o run/npylm.so -O3
 	cp run/npylm.so run/semi-supervised/npylm.so
