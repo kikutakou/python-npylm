@@ -1,19 +1,17 @@
+
+ifeq ($(shell uname),Darwin)
+PYTHON3_CONFIG = /usr/local/bin/python3-config
+else
+PYTHON3_CONFIG = python3-config
+endif
+
 CC = g++
 BOOST = /usr/local/Cellar/boost/1.66.0
-INCLUDE = `python3-config --includes` -std=c++14 -I$(BOOST)/include
-LDFLAGS = `python3-config --ldflags` -lboost_serialization -lboost_python3 -L$(BOOST)/lib
+INCLUDE = $(shell $(PYTHON3_CONFIG) --includes) -std=c++14 -I$(BOOST)/include
+LDFLAGS = $(shell $(PYTHON3_CONFIG) --ldflags) -lboost_serialization -lboost_python3 -L$(BOOST)/lib
 SOFLAGS = -shared -fPIC -march=native
 TESTFLAGS = -O0 -g -Wall
 SOURCES = src/python/*.cpp src/npylm/*.cpp src/npylm/lm/*.cpp
-
-
-UNAME = $(shell uname)
-
-ifeq ($(UNAME),Darwin)
-INCLUDE = `/usr/local/bin/python3-config --includes` -std=c++14 -I$(BOOST)/include
-LDFLAGS = `/usr/local/bin/python3-config --ldflags` -lboost_serialization -lboost_python3 -L$(BOOST)/lib
-SOFLAGS = -DPIC -bundle -fPIC -march=native
-endif
 
 install: ## npylm.soを生成
 	$(CC) $(INCLUDE) $(SOFLAGS) src/python.cpp $(SOURCES) $(LDFLAGS) -o run/npylm.so -O3
@@ -28,10 +26,10 @@ install_ubuntu: ## npylm.soを生成
 	rm -rf run/npylm.so
 
 check_includes:	## Python.hの場所を確認
-	python3-config --includes
+	@echo $(INCLUDE)
 
 check_ldflags:	## libpython3の場所を確認
-	python3-config --ldflags
+	@echo $(LDFLAGS)
 
 module_tests: ## 各モジュールのテスト.
 	$(CC) test/module_tests/wordtype.cpp $(SOURCES) -o test/module_tests/wordtype $(INCLUDE) $(LDFLAGS) $(TESTFLAGS)
