@@ -7,20 +7,22 @@ endif
 
 CC = g++
 BOOST = /usr/local/Cellar/boost/1.66.0
-INCLUDE = $(shell $(PYTHON3_CONFIG) --includes) -std=c++14 -I$(BOOST)/include
+CXXFLAGS = $(shell $(PYTHON3_CONFIG) --includes) -std=c++14 -I$(BOOST)/include
 LDFLAGS = $(shell $(PYTHON3_CONFIG) --ldflags) -lboost_serialization -lboost_python3 -L$(BOOST)/lib
 SOFLAGS = -shared -fPIC -march=native
 TESTFLAGS = -O0 -g -Wall
-SOURCES = src/python/*.cpp src/npylm/*.cpp src/npylm/lm/*.cpp
+SOURCES = $(wildcard src/python.cpp src/python/*.cpp src/npylm/*.cpp src/npylm/lm/*.cpp)
+OBJECTS = $(SOURCES:%.cpp=%.o)
 
-install: ## npylm.soを生成
-	$(CC) $(INCLUDE) $(SOFLAGS) src/python.cpp $(SOURCES) $(LDFLAGS) -o run/npylm.so -O3
+
+install: $(OBJECTS)
+	$(CC) $(OBJECTS) $(LDFLAGS) $(SOFLAGS) -o run/npylm.so -O3
 	cp run/npylm.so run/semi-supervised/npylm.so
 	cp run/npylm.so run/unsupervised/npylm.so
 	rm -rf run/npylm.so
 
 install_ubuntu: ## npylm.soを生成
-	$(CC) -Wl,--no-as-needed -Wno-deprecated $(INCLUDE) $(SOFLAGS) src/python.cpp $(SOURCES) $(LDFLAGS) -o run/npylm.so -O3
+	$(CC) -Wl,--no-as-needed -Wno-deprecated $(OBJECTS) $(LDFLAGS) $(SOFLAGS) -o run/npylm.so -O3
 	cp run/npylm.so run/semi-supervised/npylm.so
 	cp run/npylm.so run/unsupervised/npylm.so
 	rm -rf run/npylm.so
@@ -48,6 +50,10 @@ module_tests: ## 各モジュールのテスト.
 running_tests:	## 運用テスト
 	$(CC) test/running_tests/train.cpp $(SOURCES) -o test/running_tests/train $(INCLUDE) $(LDFLAGS) -O0 -g
 	$(CC) test/running_tests/save.cpp $(SOURCES) -o test/running_tests/save $(INCLUDE) $(LDFLAGS) $(TESTFLAGS)
+
+.PHONY: clean
+clean:
+	rm -rf $(OBJECTS)
 
 .PHONY: help
 help:
